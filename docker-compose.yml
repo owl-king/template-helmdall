@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - ./config:/config
+    expose:
+      - 80
+      - 443
+    restart: always
+    networks:
+      - traefik
+    labels:
+      - 'traefik.enable=true'
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.helmdall-web.middlewares=authelia@docker"
+      - "traefik.http.routers.helmdall-web.entrypoints=http"
+      - "traefik.http.routers.helmdall-web.rule=Host(`$APP_URL`)"
+      - "traefik.http.routers.helmdall-secure.entrypoints=https"
+      - "traefik.http.routers.helmdall-secure.rule=Host(`$APP_URL`)"
+      - "traefik.http.routers.helmdall-secure.middlewares=authelia@docker"
+      - "traefik.http.routers.helmdall-secure.tls.certresolver=letsencrypt"
+networks:
+  traefik:
+    external: true
